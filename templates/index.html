@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Landing Page Template</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='main.css') }}"
+    />
+  </head>
+  <body>
+    <div class="vendedor">
+      <h1>Bem-vindo ao meu site!</h1>
+      <p>Informe o que precisa e entrarei em contato!</p>
+      <a href="#formulario" class="cta-button">Quero Entrar em Contato</a>
+    </div>
+    <div id="formulario" class="form-section">
+      <h2>Preecha seus dados</h2>
+      <p>Irei entrar em contato por e-mail</p>
+      <form action="/submit" method="post">
+        <input type="text" name="nome" placeholder="Seu Nome" required />
+        <input type="text" name="email" placeholder="Seu E-mail" required />
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+  </body>
+</html>
