@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
@@ -6,23 +6,30 @@
     <title>Landing Page Template</title>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='main.css') }}"
+      href="{{ url_for('static', filename='css/main.css') }}"
     />
   </head>
   <body>
     <div class="vendedor">
       <h1>Bem-vindo ao meu site!</h1>
       <p>Informe o que precisa e entrarei em contato!</p>
-      <a href="#formulario" class="cta-button">Quero Entrar em Contato</a>
+      <button id="show-form-btn">Quero Entrar em Contato</button>
     </div>
-    <div id="formulario" class="form-section">
+    <div id="formulario" class="form-section hidden">
       <h2>Preecha seus dados</h2>
       <p>Irei entrar em contato por e-mail</p>
       <form action="/submit" method="post">
         <input type="text" name="nome" placeholder="Seu Nome" required />
         <input type="text" name="email" placeholder="Seu E-mail" required />
+        <textarea
+          name="motivo"
+          placeholder="Descreva brevemente o motivo do seu contato (máx. 1500 caracteres)"
+          maxlength="1500"
+          required
+        ></textarea>
         <button type="submit">Enviar</button>
       </form>
     </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   </body>
 </html>
