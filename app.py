@@ -60,12 +60,12 @@ def submit_form():
 
 
 # Listar interessados
-@app.route("/usuarios")
+@app.route("/interessados")
 def listar_interessados():
     conn = get_db_connection()
     usuarios = conn.execute("SELECT * FROM usuarios").fetchall()
     conn.close()
-    return render_template("usuarios.html", usuarios=usuarios)
+    return render_template("interessados.html", usuarios=usuarios)
 
 
 if __name__ == "__main__":
