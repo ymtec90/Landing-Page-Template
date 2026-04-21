@@ -4,24 +4,44 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lista de Interessados</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
   </head>
   <body>
-    <h1>Interessados Registrados</h1>
-    <table border="1">
-      <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>E-mail</th>
-        <th>Motivo do Contato</th>
-      </tr>
-      {% for usuario in usuarios %}
-      <tr>
-        <td>{{ usuario.id }}</td>
-        <td>{{ usuario.nome }}</td>
-        <td>{{ usuario.email }}</td>
-        <td>{{ usuario.motivo }}</td>
-      </tr>
-      {% endfor %}
-    </table>
+    <header class="hero" style="padding: 2rem;">
+      <h1>Interessados Registrados</h1>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Motivo do Contato</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for usuario in usuarios %}
+              <tr>
+                <td>{{ usuario.id }}</td>
+                <td>{{ usuario.nome }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.motivo }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="text-center" style="margin-top: 2rem;">
+          <a href="/" class="btn btn-primary">Voltar</a>
+        </div>
+      </section>
+    </main>
   </body>
 </html>
