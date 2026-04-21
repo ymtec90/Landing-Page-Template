@@ -56,7 +56,7 @@ def submit_form():
     conn.close()
 
     # Informar sobre retorno em breve
-    return f"<h1>Obrigado, {nome}! Entraremos em contato em breve!</h1>"
+    return render_template("obrigado.html", nome=nome)
 
 
 # Listar interessados

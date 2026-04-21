@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Obrigado!</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+  </head>
+  <body>
+    <header class="hero" style="padding: 2rem;">
+      <h1>Sucesso!</h1>
+    </header>
+
+    <main class="container">
+      <section class="card text-center">
+        <h2 style="margin-bottom: 1rem;">Obrigado, {{ nome }}!</h2>
+        <p style="margin-bottom: 2rem; font-size: 1.2rem;">Entraremos em contato em breve através do e-mail que você forneceu.</p>
+        <a href="/" class="btn btn-primary">Voltar ao Início</a>
+      </section>
+    </main>
+  </body>
+</html>
