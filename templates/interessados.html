@@ -27,19 +27,20 @@
               </tr>
             </thead>
             <tbody>
-              {% for usuario in usuarios %}
+              {% for interessado in usuarios %}
               <tr>
-                <td>{{ usuario.id }}</td>
-                <td>{{ usuario.nome }}</td>
-                <td>{{ usuario.email }}</td>
-                <td>{{ usuario.motivo }}</td>
+                <td>{{ interessado.id }}</td>
+                <td>{{ interessado.nome }}</td>
+                <td>{{ interessado.email }}</td>
+                <td>{{ interessado.motivo }}</td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
-        <div class="text-center" style="margin-top: 2rem;">
+        <div class="text-center" style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem;">
           <a href="/" class="btn btn-primary">Voltar</a>
+          <a href="/logout" class="btn" style="background-color: #dc3545;">Sair</a>
         </div>
       </section>
     </main>
