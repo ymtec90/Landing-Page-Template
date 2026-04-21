@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login de Administrador</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+  </head>
+  <body>
+    <header class="hero" style="padding: 2rem;">
+      <h1>Acesso Restrito</h1>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="text-center">
+          <h2>Login</h2>
+        </div>
+        {% if error %}
+        <p style="color: red; text-align: center;">{{ error }}</p>
+        {% endif %}
+        <form action="/login" method="post">
+          <div class="form-group">
+            <label for="username">Usuário</label>
+            <input type="text" id="username" name="username" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" class="form-control" required />
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
