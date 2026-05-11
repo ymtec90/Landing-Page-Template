@@ -67,11 +67,6 @@ def create_table():
     conn.close()
 
 
-# Chama a funcao para criar a tabela se necessario
-if not os.environ.get("TESTING"):
-    create_table()
-
-
 # Exibicao da Landing Page
 @app.route("/")
 def landing_page():
@@ -187,4 +182,6 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t"))
+    # Chama a funcao para criar a tabela se necessario
+    create_table()
+    app.run(debug=True)
