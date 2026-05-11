@@ -19,24 +19,16 @@ def get_db_connection():
 def create_table():
     conn = get_db_connection()
 
-    # Check if old table exists
-    table_exists = conn.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios';"
-    ).fetchone()
-
-    if table_exists:
-        conn.execute("ALTER TABLE usuarios RENAME TO interessados;")
-    else:
-        conn.execute(
-            """
-                     CREATE TABLE IF NOT EXISTS interessados (
-                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                     nome TEXT NOT NULL,
-                     email TEXT NOT NULL,
-                     motivo TEXT
-                     );
-            """
-        )
+    conn.execute(
+        """
+                 CREATE TABLE IF NOT EXISTS interessados (
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 nome TEXT NOT NULL,
+                 email TEXT NOT NULL,
+                 motivo TEXT
+                 );
+        """
+    )
 
     conn.execute(
         """
