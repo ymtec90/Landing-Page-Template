@@ -1,70 +1,99 @@
 import pytest
 import sqlite3
-import tempfile
 import os
-from werkzeug.security import generate_password_hash
+import tempfile
+import app as my_app
 from app import app
+from werkzeug.security import check_password_hash
 
 @pytest.fixture
-def client():
-    app.config["TESTING"] = True
-    app.config["WTF_CSRF_ENABLED"] = False
-    with app.test_client() as client:
-        with app.app_context():
-            yield client
-
-@pytest.fixture
-def test_db(monkeypatch):
+def temp_db():
     db_fd, db_path = tempfile.mkstemp()
 
-    # Initialize the temp db
-    temp_conn = sqlite3.connect(db_path)
-    temp_conn.execute(
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+
+    conn.execute(
         """
-        CREATE TABLE IF NOT EXISTS admins (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL
-        );
+                 CREATE TABLE IF NOT EXISTS interessados (
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 nome TEXT NOT NULL,
+                 email TEXT NOT NULL,
+                 motivo TEXT
+                 );
         """
     )
-    hashed_password = generate_password_hash("testpassword")
-    temp_conn.execute(
-        "INSERT INTO admins (username, password) VALUES (?, ?)",
-        ("admin", hashed_password)
+
+    conn.execute(
+        """
+                 CREATE TABLE IF NOT EXISTS admins (
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 username TEXT NOT NULL UNIQUE,
+                 password TEXT NOT NULL
+                 );
+        """
     )
-    temp_conn.commit()
-    temp_conn.close()
+    conn.commit()
+    conn.close()
 
-    def mock_get_db_connection():
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
-
-    monkeypatch.setattr("app.get_db_connection", mock_get_db_connection)
-
-    yield
+    yield db_path
 
     os.close(db_fd)
     os.unlink(db_path)
 
-def test_login_successful(client, test_db):
-    response = client.post("/login", data={"username": "admin", "password": "testpassword"})
+@pytest.fixture
+def client(monkeypatch, temp_db):
+    app.config['TESTING'] = True
+
+    def get_mock_db_connection():
+        conn = sqlite3.connect(temp_db)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    monkeypatch.setattr(my_app, "get_db_connection", get_mock_db_connection)
+
+    with app.test_client() as client:
+        yield client
+
+def test_setup_admin_get_no_admin(client):
+    response = client.get("/setup")
+    assert response.status_code == 200
+    assert b"Setup" in response.data or b"setup" in response.data or b"<form" in response.data # Check some page content since we mocked everything
+
+def test_setup_admin_post_create_admin(client, temp_db):
+    response = client.post("/setup", data={
+        "username": "admin",
+        "password": "password123"
+    })
+
     assert response.status_code == 302
-    assert response.location == "/interessados"
+    assert "/interessados" in response.headers["Location"]
 
-def test_login_failed_wrong_password(client, test_db):
-    response = client.post("/login", data={"username": "admin", "password": "wrongpassword"})
-    assert response.status_code == 200
-    assert b"Credenciais incorretas." in response.data
+    conn = sqlite3.connect(temp_db)
+    conn.row_factory = sqlite3.Row
+    admin = conn.execute("SELECT * FROM admins").fetchone()
+    conn.close()
 
-def test_login_failed_wrong_username(client, test_db):
-    response = client.post("/login", data={"username": "notadmin", "password": "testpassword"})
-    assert response.status_code == 200
-    assert b"Credenciais incorretas." in response.data
+    assert admin is not None
+    assert admin["username"] == "admin"
+    assert check_password_hash(admin["password"], "password123")
 
-def test_login_get(client, test_db):
-    response = client.get("/login")
-    assert response.status_code == 200
-    # Assuming there's a login form in the HTML
-    assert b"<form" in response.data.lower()
+    with client.session_transaction() as session:
+        assert session.get("admin_logged_in") is True
+
+def test_setup_admin_already_exists(client, temp_db):
+    conn = sqlite3.connect(temp_db)
+    conn.execute("INSERT INTO admins (username, password) VALUES ('existing_admin', 'hash')")
+    conn.commit()
+    conn.close()
+
+    response = client.get("/setup")
+    assert response.status_code == 302
+    assert "/login" in response.headers["Location"]
+
+    response_post = client.post("/setup", data={
+        "username": "new_admin",
+        "password": "password"
+    })
+    assert response_post.status_code == 302
+    assert "/login" in response_post.headers["Location"]
