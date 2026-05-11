@@ -1,11 +1,20 @@
 import sqlite3
 import os
+import re
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, abort
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super_secret_key_for_development")
+
+# Configuracoes de validacao
+MAX_NOME_LEN = 100
+MAX_EMAIL_LEN = 255
+MAX_MOTIVO_LEN = 1500
+MAX_USERNAME_LEN = 50
+MAX_PASSWORD_LEN = 128
+EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
 
 # Conexao ao banco de dados
@@ -64,9 +73,17 @@ def landing_page():
 # Processar dados do formulario
 @app.route("/submit", methods=["POST"])
 def submit_form():
-    nome = request.form.get("nome")
-    email = request.form.get("email")
-    motivo = request.form.get("motivo")
+    nome = (request.form.get("nome") or "").strip()
+    email = (request.form.get("email") or "").strip()
+    motivo = (request.form.get("motivo") or "").strip()
+
+    # Validacao basica
+    if not nome or len(nome) > MAX_NOME_LEN:
+        abort(400, description="Nome invalido ou muito longo.")
+    if not email or len(email) > MAX_EMAIL_LEN or not EMAIL_REGEX.match(email):
+        abort(400, description="E-mail invalido ou muito longo.")
+    if not motivo or len(motivo) > MAX_MOTIVO_LEN:
+        abort(400, description="Motivo invalido ou muito longo.")
 
     # Salvar os dados no banco
     conn = get_db_connection()
@@ -109,16 +126,20 @@ def setup_admin():
         return redirect(url_for("login"))
 
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = (request.form.get("username") or "").strip()
+        password = request.form.get("password") or ""
 
-        if username and password:
-            hashed_password = generate_password_hash(password)
-            conn.execute("INSERT INTO admins (username, password) VALUES (?, ?)", (username, hashed_password))
-            conn.commit()
-            conn.close()
-            session["admin_logged_in"] = True
-            return redirect(url_for("listar_interessados"))
+        if not username or len(username) > MAX_USERNAME_LEN:
+            abort(400, description="Usuario invalido ou muito longo.")
+        if not password or len(password) > MAX_PASSWORD_LEN:
+            abort(400, description="Senha invalida ou muito longa.")
+
+        hashed_password = generate_password_hash(password)
+        conn.execute("INSERT INTO admins (username, password) VALUES (?, ?)", (username, hashed_password))
+        conn.commit()
+        conn.close()
+        session["admin_logged_in"] = True
+        return redirect(url_for("listar_interessados"))
 
     conn.close()
     return render_template("setup.html")
@@ -127,8 +148,13 @@ def setup_admin():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = (request.form.get("username") or "").strip()
+        password = request.form.get("password") or ""
+
+        if not username or len(username) > MAX_USERNAME_LEN:
+            abort(400, description="Usuario invalido ou muito longo.")
+        if not password or len(password) > MAX_PASSWORD_LEN:
+            abort(400, description="Senha invalida ou muito longa.")
 
         conn = get_db_connection()
         admin = conn.execute("SELECT * FROM admins WHERE username = ?", (username,)).fetchone()
@@ -150,4 +176,5 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() in ["true", "1", "t"]
+    app.run(debug=debug_mode)
