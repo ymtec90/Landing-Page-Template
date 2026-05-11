@@ -19,7 +19,8 @@ EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
 # Conexao ao banco de dados
 def get_db_connection():
-    conn = sqlite3.connect("database.db")
+    db_path = os.environ.get("DB_PATH", "database.db")
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row  # Acessa colunas como dicionarios
     return conn
 
@@ -53,7 +54,8 @@ def create_table():
 
 
 # Chama a funcao para criar a tabela se necessario
-create_table()
+if not os.environ.get("TESTING"):
+    create_table()
 
 
 # Exibicao da Landing Page
