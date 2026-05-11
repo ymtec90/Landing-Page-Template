@@ -51,10 +51,6 @@ def create_table():
     conn.close()
 
 
-# Chama a funcao para criar a tabela se necessario
-create_table()
-
-
 # Exibicao da Landing Page
 @app.route("/")
 def landing_page():
@@ -150,4 +146,6 @@ def logout():
 
 
 if __name__ == "__main__":
+    # Chama a funcao para criar a tabela se necessario
+    create_table()
     app.run(debug=True)
