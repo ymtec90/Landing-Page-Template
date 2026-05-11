@@ -5,7 +5,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, session, redirect, url_for
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super_secret_key_for_development")
+secret_key = os.environ.get("FLASK_SECRET_KEY")
+if not secret_key:
+    raise ValueError(
+        "No FLASK_SECRET_KEY set for Flask app. Did you forget to set it?"
+    )
+app.secret_key = secret_key
 
 
 # Conexao ao banco de dados
@@ -21,7 +26,8 @@ def create_table():
 
     # Check if old table exists
     table_exists = conn.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios';"
+        "SELECT name FROM sqlite_master "
+        "WHERE type='table' AND name='usuarios';"
     ).fetchone()
 
     if table_exists:
@@ -114,7 +120,10 @@ def setup_admin():
 
         if username and password:
             hashed_password = generate_password_hash(password)
-            conn.execute("INSERT INTO admins (username, password) VALUES (?, ?)", (username, hashed_password))
+            conn.execute(
+                "INSERT INTO admins (username, password) VALUES (?, ?)",
+                (username, hashed_password)
+            )
             conn.commit()
             conn.close()
             session["admin_logged_in"] = True
@@ -131,14 +140,18 @@ def login():
         password = request.form.get("password")
 
         conn = get_db_connection()
-        admin = conn.execute("SELECT * FROM admins WHERE username = ?", (username,)).fetchone()
+        admin = conn.execute(
+            "SELECT * FROM admins WHERE username = ?", (username,)
+        ).fetchone()
         conn.close()
 
         if admin and check_password_hash(admin["password"], password):
             session["admin_logged_in"] = True
             return redirect(url_for("listar_interessados"))
         else:
-            return render_template("login.html", error="Credenciais incorretas.")
+            return render_template(
+                "login.html", error="Credenciais incorretas."
+            )
 
     return render_template("login.html")
 
